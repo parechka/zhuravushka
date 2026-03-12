@@ -155,7 +155,9 @@ function unlockAllAudio() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
   const all = [audioMenu, audioIntro, audioMusic, audioGameover, ...voiceLines, ...allSfx];
   all.forEach(a => {
-    a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(() => {});
+    const vol = a.volume;
+    a.volume = 0;
+    a.play().then(() => { a.pause(); a.currentTime = 0; a.volume = vol; }).catch(() => { a.volume = vol; });
   });
 }
 
