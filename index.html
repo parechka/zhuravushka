@@ -136,14 +136,14 @@ function stopAllSfx() {
   flowActive = false;
 }
 
-// Unlock ALL audio elements on first user gesture (mobile requirement)
+// Unlock audio on mobile via AudioContext + preload all elements
+let audioCtx;
 function unlockAllAudio() {
-  // play+pause trick unlocks HTMLAudioElement on mobile
-  // Skip audioMenu — it's played immediately after this call
-  const all = [audioIntro, audioMusic, audioGameover, ...voiceLines, ...allSfx];
-  all.forEach(a => {
-    a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(() => {});
-  });
+  // Resume AudioContext — the standard mobile audio unlock
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  // Preload (not play!) other audio so they're ready when needed
+  [audioIntro, audioMusic, audioGameover, ...voiceLines, ...allSfx].forEach(a => a.load());
 }
 
 // Page Visibility API — pause audio when tab not active
@@ -576,11 +576,11 @@ function onDown(p) {
   if (G.state === 'title') {
     if (G.introScreen === 0) {
       if (!menuActivated) {
-        // First tap: start menu music & unlock ALL audio for mobile
+        // First tap: play menu music FIRST, then unlock others
         menuActivated = true;
-        unlockAllAudio();
         audioMenu.currentTime = 0;
         audioMenu.play().catch(() => {});
+        unlockAllAudio();
         return;
       }
       // Second tap: proceed to story
