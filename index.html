@@ -32,8 +32,8 @@ const ctx = buf.getContext('2d');
 
 function resize() {
   const dpr = window.devicePixelRatio || 1;
-  // Bitmap: integer scale in physical pixels, capped at 4 for iOS performance
-  const ps = Math.max(1, Math.min(4, Math.floor(Math.min(
+  // Bitmap: integer scale in physical pixels, capped at 2 to test iOS perf
+  const ps = Math.max(1, Math.min(2, Math.floor(Math.min(
     window.innerWidth * dpr / W,
     window.innerHeight * dpr / H
   ))));
