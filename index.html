@@ -147,18 +147,19 @@ function initLoading() {
     .catch(() => { fontLoaded = true; });
 }
 
-// Unlock all audio on user gesture (play+pause trick for iOS, AudioContext for Android)
+// Unlock audio on user gesture: silent buffer through AudioContext
 function unlockAllAudio() {
   if (audioUnlocked) return;
   audioUnlocked = true;
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === 'suspended') audioCtx.resume();
-  const all = [audioMenu, audioIntro, audioMusic, audioGameover, ...voiceLines, ...allSfx];
-  all.forEach(a => {
-    const vol = a.volume;
-    a.volume = 0;
-    a.play().then(() => { a.pause(); a.currentTime = 0; a.volume = vol; }).catch(() => { a.volume = vol; });
-  });
+  // Play silent buffer — unlocks audio playback on iOS Safari
+  const b = audioCtx.createBuffer(1, 1, 22050);
+  const s = audioCtx.createBufferSource();
+  s.buffer = b; s.connect(audioCtx.destination); s.start(0);
+  // Preload audio files (start downloading, don't play)
+  [audioMenu, audioIntro, audioMusic, audioGameover, ...voiceLines, ...allSfx]
+    .forEach(a => a.load());
 }
 
 // Page Visibility API — pause audio when tab not active
