@@ -34,10 +34,10 @@ function resize() {
   // Canvas bitmap ALWAYS stays at native game resolution
   display.width = W;
   display.height = H;
-  // CSS scales it to fill the screen — image-rendering:pixelated ensures nearest-neighbor
-  const s = Math.min(window.innerWidth / W, window.innerHeight / H);
-  display.style.width = Math.floor(W * s) + 'px';
-  display.style.height = Math.floor(H * s) + 'px';
+  // INTEGER scale only — every game pixel = exactly s×s screen pixels, no uneven stretching
+  const s = Math.max(1, Math.floor(Math.min(window.innerWidth / W, window.innerHeight / H)));
+  display.style.width = (W * s) + 'px';
+  display.style.height = (H * s) + 'px';
 }
 resize();
 window.addEventListener('resize', resize);
@@ -411,7 +411,7 @@ function renderBG() {
   rect(c,BLD_L+sP,sY+sH-1,BLD_W-sP*2,1,P.signD);
   rect(c,BLD_L+sP+2,sY+1,BLD_W-sP*2-4,1,'#ddaa44');
   rect(c,BLD_L+sP+2,sY+sH-2,BLD_W-sP*2-4,1,'#ddaa44');
-  c.fillStyle='#fff';c.font='bold 8px '+F;c.textAlign='center';
+  c.fillStyle='#fff';c.font='8px '+F;c.textAlign='center';
   c.fillText('ЖУРАВУШКА',W/2,sY+9);
   const wSY=BLD_TOP+27;
   for(let r=0;r<3;r++)for(let col=0;col<6;col++){
@@ -1166,7 +1166,7 @@ function render() {
   for (const p of G.popups) {
     ctx.globalAlpha = p.life < 15 ? p.life / 15 : 1;
     const sz = p.scale >= 1.5 ? 16 : 8;
-    ctx.fillStyle = '#000'; ctx.font = `bold ${sz}px ${F}`; ctx.textAlign = 'center';
+    ctx.fillStyle = '#000'; ctx.font = `${sz}px ${F}`; ctx.textAlign = 'center';
     ctx.fillText(p.text, p.x + 1, p.y + 1);
     ctx.fillStyle = p.color;
     ctx.fillText(p.text, p.x, p.y);
