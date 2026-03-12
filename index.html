@@ -138,23 +138,25 @@ function stopAllSfx() {
 
 // AudioContext for mobile unlock
 let audioCtx;
+let audioUnlocked = false;
 
-// Asset loading system
-let loadTotal = 0, loadDone = 0, fontLoaded = false;
-function loadAudioAsset(a) {
-  loadTotal++;
-  if (a.readyState >= 4) { loadDone++; return; } // already loaded
-  a.addEventListener('canplaythrough', () => { loadDone++; }, { once: true });
-  a.load();
-}
+// Loading: only wait for font (mobile blocks audio preload without gesture)
+let fontLoaded = false;
 function initLoading() {
-  // Font
-  loadTotal++;
-  document.fonts.load('8px "PS2P"').then(() => { fontLoaded = true; loadDone++; })
-    .catch(() => { fontLoaded = true; loadDone++; });
-  // All audio
-  [audioMenu, audioIntro, audioMusic, audioGameover, ...voiceLines, ...allSfx]
-    .forEach(a => loadAudioAsset(a));
+  document.fonts.load('8px "PS2P"').then(() => { fontLoaded = true; })
+    .catch(() => { fontLoaded = true; });
+}
+
+// Unlock all audio on user gesture (play+pause trick for iOS, AudioContext for Android)
+function unlockAllAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  const all = [audioMenu, audioIntro, audioMusic, audioGameover, ...voiceLines, ...allSfx];
+  all.forEach(a => {
+    a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(() => {});
+  });
 }
 
 // Page Visibility API — pause audio when tab not active
@@ -583,10 +585,12 @@ const MUTE_X = W - 18, MUTE_Y = 2, MUTE_S = 14;
 function hitMute(p) { return p.x >= MUTE_X && p.x <= MUTE_X + MUTE_S && p.y >= MUTE_Y && p.y <= MUTE_Y + MUTE_S; }
 
 function onDown(p) {
-  // Loading screen: tap to unlock AudioContext on mobile
+  // Loading screen: tap to unlock audio + proceed
   if (G.state === 'loading') {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+    if (!fontLoaded) return; // wait for font
+    unlockAllAudio();
+    G.state = 'title';
+    renderBG();
     return;
   }
 
@@ -597,9 +601,6 @@ function onDown(p) {
     if (G.introScreen === 0) {
       if (!menuActivated) {
         menuActivated = true;
-        // AudioContext unlock on first real tap (for browsers that need gesture)
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
         audioMenu.currentTime = 0;
         audioMenu.play().catch(() => {});
         return;
@@ -622,11 +623,7 @@ function onDown(p) {
     if (Date.now() - G.overTime < 1500) return;
     // Donate link area (y=270..300)
     if (p.y >= 270 && p.y <= 300) {
-      const a = document.createElement('a');
-      a.href = 'https://donorbox.org/donation_form';
-      a.target = '_blank'; a.rel = 'noopener';
-      document.body.appendChild(a); a.click();
-      document.body.removeChild(a);
+      window.location.href = 'https://donorbox.org/donation_form';
       return;
     }
     audioGameover.pause();
@@ -858,7 +855,10 @@ function updateTourists() {
     if (t.state !== 'enter') {
       t.vy += t.speed * 0.08;
       // Gentle drift toward target X (center zone) when walking
-      if (t.state === 'walk') t.vx += (t.targetX - t.x) * 0.004;
+      if (t.state === 'walk') {
+        const drift = (t.targetX - t.x) * 0.002;
+        t.vx += Math.max(-0.08, Math.min(0.08, drift));
+      }
     }
     t.vx *= 0.93; t.vy *= 0.93;
     t.x += t.vx; t.y += t.vy;
@@ -1588,46 +1588,22 @@ function renderLoading() {
   ctx.fillStyle = '#0a0a1a';
   ctx.fillRect(0, 0, W, H);
 
-  // Title
   if (fontLoaded) {
     ctx.fillStyle = '#e94560'; ctx.font = '16px '+F;
     pxT(ctx, 'ЖУРАВУШКА', W / 2, 120, 16);
     ctx.fillStyle = '#ffd700'; ctx.font = '8px '+F;
-    pxT(ctx, 'ЗАГРУЗКА...', W / 2, 160, 8);
+    pxT(ctx, 'ЛЯЧЭБНАЯ ГРАЗЬ', W / 2, 150, 8);
+
+    if (Math.sin(Date.now() / 400) > 0) {
+      ctx.fillStyle = '#fff'; ctx.font = '8px '+F;
+      pxT(ctx, 'ДАКРАНІСЯ', W / 2, 200, 8);
+    }
   } else {
     ctx.fillStyle = '#e94560'; ctx.font = '16px monospace';
     ctx.textAlign = 'center';
     ctx.fillText('ЖУРАВУШКА', W / 2, 120);
     ctx.fillStyle = '#ffd700'; ctx.font = '12px monospace';
     ctx.fillText('ЗАГРУЗКА...', W / 2, 160);
-  }
-
-  // Progress bar
-  const barW = 120, barH = 8, barX = (W - barW) / 2, barY = 180;
-  const pct = loadTotal > 0 ? loadDone / loadTotal : 0;
-  ctx.fillStyle = '#222';
-  ctx.fillRect(barX, barY, barW, barH);
-  ctx.fillStyle = '#44ff44';
-  ctx.fillRect(barX, barY, barW * pct, barH);
-  ctx.strokeStyle = '#666';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(barX, barY, barW, barH);
-
-  // Percentage
-  const pctText = (pct * 100 | 0) + '%';
-  if (fontLoaded) {
-    ctx.fillStyle = '#aaa'; ctx.font = '8px '+F;
-    pxT(ctx, pctText, W / 2, barY + 22, 8);
-  } else {
-    ctx.fillStyle = '#aaa'; ctx.font = '10px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(pctText, W / 2, barY + 22);
-  }
-
-  // Check if done
-  if (loadDone >= loadTotal && fontLoaded) {
-    G.state = 'title';
-    renderBG();
   }
 }
 
