@@ -138,6 +138,17 @@ function stopAllSfx() {
 
 const F = '"PS2P", monospace'; // font shorthand
 
+// Pixel-perfect text: draw each char at integer grid positions
+// PS2P at 8px = 8px per char, at 16px = 16px per char
+function pxT(c, text, cx, y, size) {
+  size = size || 8;
+  c.textAlign = 'left';
+  const x = Math.round(cx - text.length * size / 2);
+  for (let i = 0; i < text.length; i++) {
+    c.fillText(text[i], x + i * size, y);
+  }
+}
+
 const P = {
   outline:'#111122',
   skin:'#e8b88a',skinS:'#c9956b',skinL:'#f5d4b3',
@@ -420,8 +431,8 @@ function renderBG() {
   rect(c,BLD_L+sP,sY+sH-1,BLD_W-sP*2,1,P.signD);
   rect(c,BLD_L+sP+2,sY+1,BLD_W-sP*2-4,1,'#ddaa44');
   rect(c,BLD_L+sP+2,sY+sH-2,BLD_W-sP*2-4,1,'#ddaa44');
-  c.fillStyle='#fff';c.font='8px '+F;c.textAlign='center';
-  c.fillText('ЖУРАВУШКА',W/2,sY+9);
+  c.fillStyle='#fff';c.font='8px '+F;
+  pxT(c,'ЖУРАВУШКА',W/2,sY+9,8);
   const wSY=BLD_TOP+27;
   for(let r=0;r<3;r++)for(let col=0;col<6;col++){
     const gx=Math.floor((BLD_W-6*12)/7);
@@ -1187,11 +1198,11 @@ function render() {
   // Wave text
   if (G.waveTextTimer > 0) {
     ctx.globalAlpha = G.waveTextTimer < 15 ? G.waveTextTimer / 15 : 1;
-    ctx.font = '16px '+F; ctx.textAlign = 'center';
+    ctx.font = '16px '+F;
     ctx.fillStyle = '#000';
-    ctx.fillText(G.waveText, W / 2 + 1, H / 2 - 29);
+    pxT(ctx, G.waveText, W / 2 + 1, H / 2 - 29, 16);
     ctx.fillStyle = '#ffdd00';
-    ctx.fillText(G.waveText, W / 2, H / 2 - 30);
+    pxT(ctx, G.waveText, W / 2, H / 2 - 30, 16);
     ctx.globalAlpha = 1;
   }
 
@@ -1205,17 +1216,17 @@ function render() {
     ctx.fillStyle = 'rgba(0,0,0,0.55)';
     ctx.fillRect(0, H / 2 - 50, W, 55);
     // Line 1: АДПУСЦІ ЭКРАН!
-    ctx.font = '16px ' + F; ctx.textAlign = 'center';
+    ctx.font = '16px ' + F;
     ctx.fillStyle = '#000';
-    ctx.fillText('АДПУСЦІ ЭКРАН!', W / 2 + 1, H / 2 - 27);
+    pxT(ctx, 'АДПУСЦІ ЭКРАН!', W / 2 + 1, H / 2 - 27, 16);
     ctx.fillStyle = '#ff4444';
-    ctx.fillText('АДПУСЦІ ЭКРАН!', W / 2, H / 2 - 28);
+    pxT(ctx, 'АДПУСЦІ ЭКРАН!', W / 2, H / 2 - 28, 16);
     // Line 2: ГРАЗЬ НАБІРАЕЦЦА!
     ctx.font = '8px ' + F;
     ctx.fillStyle = '#000';
-    ctx.fillText('ГРАЗЬ НАБІРАЕЦЦА!', W / 2 + 1, H / 2 - 11);
+    pxT(ctx, 'ГРАЗЬ НАБІРАЕЦЦА!', W / 2 + 1, H / 2 - 11, 8);
     ctx.fillStyle = '#ffdd00';
-    ctx.fillText('ГРАЗЬ НАБІРАЕЦЦА!', W / 2, H / 2 - 12);
+    pxT(ctx, 'ГРАЗЬ НАБІРАЕЦЦА!', W / 2, H / 2 - 12, 8);
     ctx.globalAlpha = 1;
   }
 
@@ -1332,30 +1343,30 @@ function renderTitle() {
     ctx.fillStyle = 'rgba(0,0,0,0.65)';
     ctx.fillRect(0, GND_Y + 5, W, 175);
 
-    ctx.fillStyle = '#e94560'; ctx.font = '16px '+F; ctx.textAlign = 'center';
-    ctx.fillText('ЖУРАВУШКА', W / 2, GND_Y + 32);
+    ctx.fillStyle = '#e94560'; ctx.font = '16px '+F;
+    pxT(ctx, 'ЖУРАВУШКА', W / 2, GND_Y + 32, 16);
 
     ctx.fillStyle = '#ffd700'; ctx.font = '8px '+F;
-    ctx.fillText('ЛЯЧЭБНАЯ ГРАЗЬ', W / 2, GND_Y + 54);
+    pxT(ctx, 'ЛЯЧЭБНАЯ ГРАЗЬ', W / 2, GND_Y + 54, 8);
 
     ctx.fillStyle = '#aaa'; ctx.font = '8px '+F;
-    ctx.fillText('МIНЗДРАЎ РБ', W / 2, GND_Y + 74);
-    ctx.fillText('ПАПЯРЭДЖВАЕ:', W / 2, GND_Y + 86);
+    pxT(ctx, 'МIНЗДРАЎ РБ', W / 2, GND_Y + 74, 8);
+    pxT(ctx, 'ПАПЯРЭДЖВАЕ:', W / 2, GND_Y + 86, 8);
     ctx.fillStyle = '#ff8844'; ctx.font = '8px '+F;
-    ctx.fillText('ГРАЗЬ ЛЕЧЫЦЬ', W / 2, GND_Y + 104);
-    ctx.fillText('УСЁ!', W / 2, GND_Y + 116);
+    pxT(ctx, 'ГРАЗЬ ЛЕЧЫЦЬ', W / 2, GND_Y + 104, 8);
+    pxT(ctx, 'УСЁ!', W / 2, GND_Y + 116, 8);
 
     if (Math.sin(Date.now() / 400) > 0) {
       ctx.fillStyle = '#fff'; ctx.font = '8px '+F;
-      ctx.fillText('ДАКРАНІСЯ', W / 2, GND_Y + 140);
+      pxT(ctx, 'ДАКРАНІСЯ', W / 2, GND_Y + 140, 8);
     }
   }
   else if (G.introScreen === 1) {
     // Screen 1: Story
     ctx.fillStyle = '#0a0a1a'; ctx.fillRect(0, 0, W, H);
 
-    ctx.fillStyle = '#e94560'; ctx.font = '16px '+F; ctx.textAlign = 'center';
-    ctx.fillText('ГІСТОРЫЯ', W / 2, 30);
+    ctx.fillStyle = '#e94560'; ctx.font = '16px '+F;
+    pxT(ctx, 'ГІСТОРЫЯ', W / 2, 30, 16);
 
     ctx.fillStyle = '#ddd'; ctx.font = '8px '+F;
     const lines = [
@@ -1370,52 +1381,52 @@ function renderTitle() {
       'спыніць іх...',
     ];
     for (let i = 0; i < lines.length; i++) {
-      ctx.fillText(lines[i], W / 2, 52 + i * 14);
+      if (lines[i]) pxT(ctx, lines[i], W / 2, 52 + i * 14, 8);
     }
 
     // Draw Azarenok big
     ctx.drawImage(SPR.az, W / 2 - 16, 185, 32, 38);
 
     ctx.fillStyle = '#ffd700'; ctx.font = '8px '+F;
-    ctx.fillText('АЗАРОНАК', W / 2, 236);
+    pxT(ctx, 'АЗАРОНАК', W / 2, 236, 8);
     ctx.fillStyle = '#aaa'; ctx.font = '8px '+F;
-    ctx.fillText('ГРАЗЕТЭРАПЕЎТ', W / 2, 252);
+    pxT(ctx, 'ГРАЗЕТЭРАПЕЎТ', W / 2, 252, 8);
 
     if (Math.sin(Date.now() / 400) > 0) {
       ctx.fillStyle = '#fff'; ctx.font = '8px '+F;
-      ctx.fillText('>>> ДАЛЕЙ <<<', W / 2, 280);
+      pxT(ctx, '>>> ДАЛЕЙ <<<', W / 2, 280, 8);
     }
   }
   else {
     // Screen 2: Instructions
     ctx.fillStyle = '#0a0a1a'; ctx.fillRect(0, 0, W, H);
 
-    ctx.fillStyle = '#e94560'; ctx.font = '16px '+F; ctx.textAlign = 'center';
-    ctx.fillText('ЯК ГУЛЯЦЬ', W / 2, 24);
+    ctx.fillStyle = '#e94560'; ctx.font = '16px '+F;
+    pxT(ctx, 'ЯК ГУЛЯЦЬ', W / 2, 24, 16);
 
     ctx.fillStyle = '#ddd'; ctx.font = '8px '+F;
-    ctx.fillText('ДАКРАНІСЯ КАБ', W / 2, 46);
-    ctx.fillText('СТРАЛЯЦЬ ГРАЗЗЮ', W / 2, 60);
+    pxT(ctx, 'ДАКРАНІСЯ КАБ', W / 2, 46, 8);
+    pxT(ctx, 'СТРАЛЯЦЬ ГРАЗЗЮ', W / 2, 60, 8);
 
     // Draw tourist -> stream -> door
     ctx.drawImage(SPR.t1_0, 25, 68, 16, 24);
     ctx.fillStyle = P.mud;
     for (let i = 0; i < 8; i++) ctx.fillRect(48 + i * 4, 78, 3, 2);
     ctx.fillStyle = '#ffd700'; ctx.font = '8px '+F;
-    ctx.fillText('\u2190', 88, 84);
+    ctx.textAlign = 'left'; ctx.fillText('\u2190', 88, 84);
     rect(ctx, 96, 70, 10, 18, P.door);
 
     ctx.fillStyle = '#aaffaa'; ctx.font = '8px '+F;
-    ctx.fillText('ЗАГАНІ ТУРЫСТАЎ', W / 2, 108);
-    ctx.fillText('У САНАТОРЫЙ!', W / 2, 122);
+    pxT(ctx, 'ЗАГАНІ ТУРЫСТАЎ', W / 2, 108, 8);
+    pxT(ctx, 'У САНАТОРЫЙ!', W / 2, 122, 8);
 
     ctx.fillStyle = '#ff8844'; ctx.font = '8px '+F;
-    ctx.fillText('УЦЯКЛІ 5 -', W / 2, 142);
-    ctx.fillText('ПРАЙГРАЎ!', W / 2, 156);
+    pxT(ctx, 'УЦЯКЛІ 5 -', W / 2, 142, 8);
+    pxT(ctx, 'ПРАЙГРАЎ!', W / 2, 156, 8);
 
     // Tourist types
     ctx.fillStyle = '#ffd700'; ctx.font = '8px '+F;
-    ctx.fillText('ТУРЫСТЫ:', W / 2, 172);
+    pxT(ctx, 'ТУРЫСТЫ:', W / 2, 172, 8);
 
     const types = [
       ['t1_0', 16, 'ЛЁГКІ'],
@@ -1426,14 +1437,13 @@ function renderTitle() {
     for (let i = 0; i < types.length; i++) {
       const [key, , label] = types[i];
       ctx.drawImage(SPR[key], 20, 180 + i * 24, 14, 21);
-      ctx.fillStyle = '#ccc'; ctx.font = '8px '+F; ctx.textAlign = 'left';
-      ctx.fillText(label, 40, 194 + i * 24);
-      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ccc'; ctx.font = '8px '+F;
+      ctx.textAlign = 'left'; ctx.fillText(label, 40, 194 + i * 24);
     }
 
     if (Math.sin(Date.now() / 400) > 0) {
       ctx.fillStyle = '#fff'; ctx.font = '16px '+F;
-      ctx.fillText('ГУЛЯЦЬ!', W / 2, 292);
+      pxT(ctx, 'ГУЛЯЦЬ!', W / 2, 292, 16);
     }
   }
 }
@@ -1444,24 +1454,24 @@ function renderGameOver() {
   ctx.fillStyle = 'rgba(0,0,0,0.7)';
   ctx.fillRect(0, 0, W, H);
 
-  ctx.fillStyle = '#e94560'; ctx.font = '16px '+F; ctx.textAlign = 'center';
-  ctx.fillText('САНАТОРЫЙ', W / 2, 95);
-  ctx.fillText('АПУСЦЕЎ!', W / 2, 118);
+  ctx.fillStyle = '#e94560'; ctx.font = '16px '+F;
+  pxT(ctx, 'САНАТОРЫЙ', W / 2, 95, 16);
+  pxT(ctx, 'АПУСЦЕЎ!', W / 2, 118, 16);
 
   ctx.fillStyle = '#fff'; ctx.font = '8px '+F;
-  ctx.fillText('АЧКІ: ' + G.score, W / 2, 145);
+  pxT(ctx, 'АЧКІ: ' + G.score, W / 2, 145, 8);
 
   ctx.fillStyle = '#aaffaa'; ctx.font = '8px '+F;
-  ctx.fillText('АЗДАРОЎЛЕНА: ' + G.healed, W / 2, 168);
+  pxT(ctx, 'АЗДАРОЎЛЕНА: ' + G.healed, W / 2, 168, 8);
 
   if (G.bestCombo > 1) {
     ctx.fillStyle = '#ffd700';
-    ctx.fillText('МАКС КОМБА: x' + G.bestCombo, W / 2, 186);
+    pxT(ctx, 'МАКС КОМБА: x' + G.bestCombo, W / 2, 186, 8);
   }
 
   if (Math.sin(Date.now() / 400) > 0) {
     ctx.fillStyle = '#fff'; ctx.font = '8px '+F;
-    ctx.fillText('ПАЎТАРЫЦЬ', W / 2, 220);
+    pxT(ctx, 'ПАЎТАРЫЦЬ', W / 2, 220, 8);
   }
 }
 
