@@ -620,9 +620,13 @@ function onDown(p) {
   }
   if (G.state === 'over') {
     if (Date.now() - G.overTime < 1500) return;
-    // Donate link area (y=272..300)
-    if (p.y >= 272 && p.y <= 300) {
-      window.open('https://donorbox.org/donation_form', '_blank');
+    // Donate link area (y=270..300)
+    if (p.y >= 270 && p.y <= 300) {
+      const a = document.createElement('a');
+      a.href = 'https://donorbox.org/donation_form';
+      a.target = '_blank'; a.rel = 'noopener';
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
       return;
     }
     audioGameover.pause();
@@ -1425,8 +1429,9 @@ function renderTitle() {
       pxT(ctx, 'ДАКРАНІСЯ', W / 2, GND_Y + 140, 8);
     }
 
-    ctx.fillStyle = '#777'; ctx.font = '8px '+F;
+    ctx.fillStyle = '#ffd700'; ctx.font = '8px '+F;
     pxT(ctx, 'ГУЛЬНЯ АД', W / 2, GND_Y + 160, 8);
+    ctx.fillStyle = '#fff';
     pxT(ctx, 'ZERKALO.IO', W / 2, GND_Y + 172, 8);
   }
   else if (G.introScreen === 1) {
@@ -1466,8 +1471,9 @@ function renderTitle() {
       pxT(ctx, '>>> ДАЛЕЙ <<<', W / 2, 280, 8);
     }
 
-    ctx.fillStyle = '#777'; ctx.font = '8px '+F;
+    ctx.fillStyle = '#ffd700'; ctx.font = '8px '+F;
     pxT(ctx, 'ГУЛЬНЯ АД', W / 2, 300, 8);
+    ctx.fillStyle = '#fff';
     pxT(ctx, 'ZERKALO.IO', W / 2, 312, 8);
   }
   else {
@@ -1547,18 +1553,28 @@ function renderGameOver() {
     pxT(ctx, 'ПАЎТАРЫЦЬ', W / 2, 220, 8);
   }
 
-  // Donate CTA
-  ctx.fillStyle = '#999'; ctx.font = '8px '+F;
-  pxT(ctx, 'ХОЧАШ БОЛЬШ', W / 2, 252, 8);
-  pxT(ctx, 'ТАКІХ ГУЛЬНЯЎ?', W / 2, 264, 8);
-  ctx.fillStyle = '#44ddff';
-  pxT(ctx, 'ПАДТРЫМАЙ', W / 2, 282, 8);
-  pxT(ctx, 'ЗЕРКАЛА!', W / 2, 294, 8);
+  // Donate CTA with motion effect
+  const dt = Date.now();
+  const pulse = Math.sin(dt / 300) * 0.3 + 0.7;
+  const bounce = Math.sin(dt / 500) * 2;
+
+  ctx.fillStyle = '#ffd700'; ctx.font = '8px '+F;
+  pxT(ctx, 'ХОЧАШ БОЛЬШ', W / 2, 250, 8);
+  pxT(ctx, 'ТАКІХ ГУЛЬНЯЎ?', W / 2, 262, 8);
+
+  // Pulsing glow for link
+  const glow = Math.sin(dt / 200) * 0.5 + 0.5;
+  const r = 68 + glow * 80 | 0, g = 220 + glow * 35 | 0, b = 255;
+  ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+  ctx.globalAlpha = pulse;
+  pxT(ctx, 'ПАДТРЫМАЙ', W / 2, 280 + (bounce | 0), 8);
+  pxT(ctx, 'ЗЕРКАЛА!', W / 2, 292 + (bounce | 0), 8);
   // Underline
   const ulX = Math.round(W / 2 - 9 * 8 / 2);
-  ctx.fillRect(ulX, 284, 72, 1);
+  ctx.fillRect(ulX, 282 + (bounce | 0), 72, 1);
   const ulX2 = Math.round(W / 2 - 8 * 8 / 2);
-  ctx.fillRect(ulX2, 296, 64, 1);
+  ctx.fillRect(ulX2, 294 + (bounce | 0), 64, 1);
+  ctx.globalAlpha = 1;
 }
 
 // ============================================================
