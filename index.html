@@ -136,6 +136,44 @@ function stopAllSfx() {
   flowActive = false;
 }
 
+// Unlock ALL audio elements on first user gesture (mobile requirement)
+function unlockAllAudio() {
+  // play+pause trick unlocks HTMLAudioElement on mobile
+  // Skip audioMenu — it's played immediately after this call
+  const all = [audioIntro, audioMusic, audioGameover, ...voiceLines, ...allSfx];
+  all.forEach(a => {
+    a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(() => {});
+  });
+}
+
+// Page Visibility API — pause audio when tab not active
+let wasPlayingBeforeHide = {};
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    // Remember which audio was playing, then pause all
+    wasPlayingBeforeHide = {};
+    const tracked = { menu: audioMenu, intro: audioIntro, music: audioMusic, gameover: audioGameover };
+    for (const [k, a] of Object.entries(tracked)) {
+      if (!a.paused) { wasPlayingBeforeHide[k] = true; a.pause(); }
+    }
+    voiceLines.forEach((v, i) => {
+      if (!v.paused) { wasPlayingBeforeHide['v' + i] = true; v.pause(); }
+    });
+    if (flowActive) { wasPlayingBeforeHide.flow = true; sfxFlow.pause(); }
+  } else {
+    // Resume only what was playing
+    if (wasPlayingBeforeHide.menu) audioMenu.play().catch(() => {});
+    if (wasPlayingBeforeHide.intro) audioIntro.play().catch(() => {});
+    if (wasPlayingBeforeHide.music) audioMusic.play().catch(() => {});
+    if (wasPlayingBeforeHide.gameover) audioGameover.play().catch(() => {});
+    voiceLines.forEach((v, i) => {
+      if (wasPlayingBeforeHide['v' + i]) v.play().catch(() => {});
+    });
+    if (wasPlayingBeforeHide.flow) sfxFlow.play().catch(() => {});
+    wasPlayingBeforeHide = {};
+  }
+});
+
 const F = '"PS2P", monospace'; // font shorthand
 
 // Pixel-perfect text: draw each char at integer grid positions
@@ -538,16 +576,11 @@ function onDown(p) {
   if (G.state === 'title') {
     if (G.introScreen === 0) {
       if (!menuActivated) {
-        // First tap: start menu music, unlock other audio, go fullscreen
+        // First tap: start menu music & unlock ALL audio for mobile
         menuActivated = true;
+        unlockAllAudio();
         audioMenu.currentTime = 0;
         audioMenu.play().catch(() => {});
-        audioMusic.load();
-        try {
-          const el = document.documentElement;
-          if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
-          else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-        } catch(e) {}
         return;
       }
       // Second tap: proceed to story
