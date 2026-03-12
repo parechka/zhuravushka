@@ -89,7 +89,15 @@ function playVoice() {
   v.currentTime = 0;
   voicePlaying = true;
   v.onended = () => { voicePlaying = false; };
-  v.play().catch(() => { voicePlaying = false; });
+  const p = v.play();
+  if (p) p.catch(() => {
+    // Not loaded — load and retry
+    v.onended = () => { voicePlaying = false; };
+    v.addEventListener('canplaythrough', () => {
+      v.play().catch(() => { voicePlaying = false; });
+    }, { once: true });
+    v.load();
+  });
   // 7-10 second cooldown (420-600 frames at 60fps)
   voiceTimer = 60 * (7 + Math.random() * 3) | 0;
 }
@@ -139,11 +147,21 @@ function stopAllSfx() {
 // Unlock audio on mobile via AudioContext + preload all elements
 let audioCtx;
 function unlockAllAudio() {
-  // Resume AudioContext — the standard mobile audio unlock
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === 'suspended') audioCtx.resume();
-  // Preload (not play!) other audio so they're ready when needed
-  [audioIntro, audioMusic, audioGameover, ...voiceLines, ...allSfx].forEach(a => a.load());
+  [audioMenu, audioIntro, audioMusic, audioGameover, ...voiceLines, ...allSfx].forEach(a => a.load());
+}
+
+// Reliable play: if file not loaded yet, load and play when ready
+function safePlay(a) {
+  a.currentTime = 0;
+  const p = a.play();
+  if (p) p.catch(() => {
+    a.addEventListener('canplaythrough', () => {
+      a.play().catch(() => {});
+    }, { once: true });
+    a.load();
+  });
 }
 
 // Page Visibility API — pause audio when tab not active
@@ -576,25 +594,21 @@ function onDown(p) {
   if (G.state === 'title') {
     if (G.introScreen === 0) {
       if (!menuActivated) {
-        // First tap: play menu music FIRST, then unlock others
         menuActivated = true;
-        audioMenu.currentTime = 0;
-        audioMenu.play().catch(() => {});
         unlockAllAudio();
+        safePlay(audioMenu);
         return;
       }
       // Second tap: proceed to story
       G.introScreen = 1;
       audioMenu.pause();
-      audioIntro.currentTime = 0;
-      audioIntro.play().catch(() => {});
+      safePlay(audioIntro);
       return;
     }
     if (G.introScreen === 1) { G.introScreen = 2; return; }
     audioIntro.pause();
     startGame();
-    audioMusic.currentTime = 0;
-    audioMusic.play().catch(() => {});
+    safePlay(audioMusic);
     return;
   }
   if (G.state === 'over') {
@@ -602,8 +616,7 @@ function onDown(p) {
     audioGameover.pause();
     stopVoice();
     startGame();
-    audioMusic.currentTime = 0;
-    audioMusic.play().catch(() => {});
+    safePlay(audioMusic);
     return;
   }
   G.touching = true; G.touchX = p.x; G.touchY = p.y;
@@ -870,8 +883,7 @@ function updateTourists() {
         audioMusic.pause();
         stopVoice();
         stopAllSfx();
-        audioGameover.currentTime = 0;
-        audioGameover.play().catch(() => {});
+        safePlay(audioGameover);
       }
     }
 
