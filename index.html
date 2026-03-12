@@ -32,18 +32,21 @@ const ctx = buf.getContext('2d');
 
 function resize() {
   const dpr = window.devicePixelRatio || 1;
-  // Integer scale in PHYSICAL pixels — bypasses all browser scaling
+  // Bitmap: integer scale in physical pixels (pixel-perfect rendering)
   const ps = Math.max(1, Math.floor(Math.min(
     window.innerWidth * dpr / W,
     window.innerHeight * dpr / H
   )));
-  // Canvas bitmap = exact physical pixels
   display.width = W * ps;
   display.height = H * ps;
-  // CSS size = bitmap / dpr → 1:1 with physical screen, zero browser interpolation
-  display.style.width = (W * ps / dpr) + 'px';
-  display.style.height = (H * ps / dpr) + 'px';
-  // Nearest-neighbor for our manual blit
+  // CSS: fill viewport maintaining aspect ratio (image-rendering:pixelated keeps it crisp)
+  if (window.innerWidth / window.innerHeight < W / H) {
+    display.style.width = window.innerWidth + 'px';
+    display.style.height = (window.innerWidth * H / W) + 'px';
+  } else {
+    display.style.height = window.innerHeight + 'px';
+    display.style.width = (window.innerHeight * W / H) + 'px';
+  }
   dCtx.imageSmoothingEnabled = false;
   dCtx.mozImageSmoothingEnabled = false;
   dCtx.webkitImageSmoothingEnabled = false;
