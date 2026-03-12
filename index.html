@@ -31,13 +31,22 @@ buf.width = W; buf.height = H;
 const ctx = buf.getContext('2d');
 
 function resize() {
-  // Canvas bitmap ALWAYS stays at native game resolution
-  display.width = W;
-  display.height = H;
-  // INTEGER scale only — every game pixel = exactly s×s screen pixels, no uneven stretching
-  const s = Math.max(1, Math.floor(Math.min(window.innerWidth / W, window.innerHeight / H)));
-  display.style.width = (W * s) + 'px';
-  display.style.height = (H * s) + 'px';
+  const dpr = window.devicePixelRatio || 1;
+  // Integer scale in PHYSICAL pixels — bypasses all browser scaling
+  const ps = Math.max(1, Math.floor(Math.min(
+    window.innerWidth * dpr / W,
+    window.innerHeight * dpr / H
+  )));
+  // Canvas bitmap = exact physical pixels
+  display.width = W * ps;
+  display.height = H * ps;
+  // CSS size = bitmap / dpr → 1:1 with physical screen, zero browser interpolation
+  display.style.width = (W * ps / dpr) + 'px';
+  display.style.height = (H * ps / dpr) + 'px';
+  // Nearest-neighbor for our manual blit
+  dCtx.imageSmoothingEnabled = false;
+  dCtx.mozImageSmoothingEnabled = false;
+  dCtx.webkitImageSmoothingEnabled = false;
 }
 resize();
 window.addEventListener('resize', resize);
@@ -1492,8 +1501,8 @@ function loop(ts) {
   // Mute icon on all screens
   drawMuteIcon();
 
-  // Blit offscreen buffer to display canvas (1:1, CSS handles scaling)
-  dCtx.drawImage(buf, 0, 0);
+  // Blit offscreen buffer to display canvas (nearest-neighbor upscale to physical pixels)
+  dCtx.drawImage(buf, 0, 0, display.width, display.height);
 
   requestAnimationFrame(loop);
 }
