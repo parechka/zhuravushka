@@ -684,6 +684,7 @@ function spawnTourist(type, doorIdx) {
     selfieTimer: type === 'selfie' ? 120 + Math.random() * 60 : 0,
     selfieImmune: false, selfieCount: 0,
     doorIdx,
+    targetX: 40 + Math.random() * (W - 80), // drift toward center zone (40..140)
   });
 }
 
@@ -843,7 +844,11 @@ function updateTourists() {
       }
     }
 
-    if (t.state !== 'enter') t.vy += t.speed * 0.08;
+    if (t.state !== 'enter') {
+      t.vy += t.speed * 0.08;
+      // Gentle drift toward target X (center zone) when walking
+      if (t.state === 'walk') t.vx += (t.targetX - t.x) * 0.004;
+    }
     t.vx *= 0.93; t.vy *= 0.93;
     t.x += t.vx; t.y += t.vy;
     t.x = Math.max(8, Math.min(W - 8, t.x));
@@ -1250,11 +1255,11 @@ function render() {
   // Wave text
   if (G.waveTextTimer > 0) {
     ctx.globalAlpha = G.waveTextTimer < 15 ? G.waveTextTimer / 15 : 1;
-    ctx.font = '16px '+F;
+    ctx.font = '8px '+F;
     ctx.fillStyle = '#000';
-    pxT(ctx, G.waveText, W / 2 + 1, H / 2 - 29, 16);
+    pxT(ctx, G.waveText, W / 2 + 1, H / 2 - 29, 8);
     ctx.fillStyle = '#ffdd00';
-    pxT(ctx, G.waveText, W / 2, H / 2 - 30, 16);
+    pxT(ctx, G.waveText, W / 2, H / 2 - 30, 8);
     ctx.globalAlpha = 1;
   }
 
@@ -1268,11 +1273,11 @@ function render() {
     ctx.fillStyle = 'rgba(0,0,0,0.55)';
     ctx.fillRect(0, H / 2 - 50, W, 55);
     // Line 1: АДПУСЦІ ЭКРАН!
-    ctx.font = '16px ' + F;
+    ctx.font = '8px ' + F;
     ctx.fillStyle = '#000';
-    pxT(ctx, 'АДПУСЦІ ЭКРАН!', W / 2 + 1, H / 2 - 27, 16);
+    pxT(ctx, 'АДПУСЦІ ЭКРАН!', W / 2 + 1, H / 2 - 27, 8);
     ctx.fillStyle = '#ff4444';
-    pxT(ctx, 'АДПУСЦІ ЭКРАН!', W / 2, H / 2 - 28, 16);
+    pxT(ctx, 'АДПУСЦІ ЭКРАН!', W / 2, H / 2 - 28, 8);
     // Line 2: ГРАЗЬ НАБІРАЕЦЦА!
     ctx.font = '8px ' + F;
     ctx.fillStyle = '#000';
