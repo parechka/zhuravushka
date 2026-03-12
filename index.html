@@ -53,6 +53,10 @@ window.addEventListener('resize', resize);
 document.addEventListener('fullscreenchange', () => setTimeout(resize, 100));
 document.addEventListener('webkitfullscreenchange', () => setTimeout(resize, 100));
 
+// Logo
+const logoImg = new Image();
+logoImg.src = 'zerkalo.png';
+
 // Audio
 const audioMenu = new Audio('menu.mp3');
 audioMenu.loop = true;
@@ -1591,22 +1595,28 @@ function renderLoading() {
   ctx.fillStyle = '#0a0a1a';
   ctx.fillRect(0, 0, W, H);
 
+  // Zerkalo logo (512x101 → 160x32 on 180px canvas)
+  if (logoImg.complete && logoImg.naturalWidth) {
+    const lw = 160, lh = Math.round(lw * logoImg.naturalHeight / logoImg.naturalWidth);
+    ctx.drawImage(logoImg, (W - lw) / 2, 60, lw, lh);
+  }
+
   if (fontLoaded) {
     ctx.fillStyle = '#e94560'; ctx.font = '16px '+F;
-    pxT(ctx, 'ЖУРАВУШКА', W / 2, 120, 16);
+    pxT(ctx, 'ЖУРАВУШКА', W / 2, 140, 16);
     ctx.fillStyle = '#ffd700'; ctx.font = '8px '+F;
-    pxT(ctx, 'ЛЯЧЭБНАЯ ГРАЗЬ', W / 2, 150, 8);
+    pxT(ctx, 'ЛЯЧЭБНАЯ ГРАЗЬ', W / 2, 168, 8);
 
     if (Math.sin(Date.now() / 400) > 0) {
       ctx.fillStyle = '#fff'; ctx.font = '8px '+F;
-      pxT(ctx, 'ДАКРАНІСЯ', W / 2, 200, 8);
+      pxT(ctx, 'ДАКРАНІСЯ', W / 2, 220, 8);
     }
   } else {
     ctx.fillStyle = '#e94560'; ctx.font = '16px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('ЖУРАВУШКА', W / 2, 120);
+    ctx.fillText('ЖУРАВУШКА', W / 2, 140);
     ctx.fillStyle = '#ffd700'; ctx.font = '12px monospace';
-    ctx.fillText('ЗАГРУЗКА...', W / 2, 160);
+    ctx.fillText('ЗАГРУЗКА...', W / 2, 170);
   }
 }
 
