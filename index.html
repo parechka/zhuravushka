@@ -467,6 +467,8 @@ const bgCanvas = document.createElement('canvas');
 bgCanvas.width = W; bgCanvas.height = H;
 function renderBG() {
   const c = bgCanvas.getContext('2d');
+  // Fill entire canvas with sky bottom color to prevent transparent side strips
+  rect(c,0,0,W,GND_Y,'rgb(166,207,211)');
   for(let y=0;y<18;y++){const t=y/18;rect(c,0,y,W,1,`rgb(${136+t*30|0},${187+t*20|0},${221-t*10|0})`);}
   rect(c,BLD_L-4,BLD_TOP,BLD_W+8,6,P.roof);rect(c,BLD_L-4,BLD_TOP,BLD_W+8,2,P.roofL);
   rect(c,BLD_L-4,BLD_TOP+4,BLD_W+8,2,P.roofD);rect(c,BLD_L,BLD_TOP+6,BLD_W,1,P.wallD);
@@ -618,6 +620,11 @@ function onDown(p) {
   }
   if (G.state === 'over') {
     if (Date.now() - G.overTime < 1500) return;
+    // Donate link area (y=272..300)
+    if (p.y >= 272 && p.y <= 300) {
+      window.open('https://donorbox.org/donation_form', '_blank');
+      return;
+    }
     audioGameover.pause();
     stopVoice();
     startGame();
@@ -1417,6 +1424,10 @@ function renderTitle() {
       ctx.fillStyle = '#fff'; ctx.font = '8px '+F;
       pxT(ctx, 'ДАКРАНІСЯ', W / 2, GND_Y + 140, 8);
     }
+
+    ctx.fillStyle = '#777'; ctx.font = '8px '+F;
+    pxT(ctx, 'ГУЛЬНЯ АД', W / 2, GND_Y + 160, 8);
+    pxT(ctx, 'ZERKALO.IO', W / 2, GND_Y + 172, 8);
   }
   else if (G.introScreen === 1) {
     // Screen 1: Story
@@ -1432,7 +1443,8 @@ function renderTitle() {
       'ў бядзе!',
       '',
       'Турысты ўцякаюць',
-      'ад лячэбнай гразі!',
+      'ад лячэбнай гразі',
+      'за мяжу!',
       '',
       'Адзін чалавек',
       'спыніць іх...',
@@ -1453,6 +1465,10 @@ function renderTitle() {
       ctx.fillStyle = '#fff'; ctx.font = '8px '+F;
       pxT(ctx, '>>> ДАЛЕЙ <<<', W / 2, 280, 8);
     }
+
+    ctx.fillStyle = '#777'; ctx.font = '8px '+F;
+    pxT(ctx, 'ГУЛЬНЯ АД', W / 2, 300, 8);
+    pxT(ctx, 'ZERKALO.IO', W / 2, 312, 8);
   }
   else {
     // Screen 2: Instructions
@@ -1530,6 +1546,19 @@ function renderGameOver() {
     ctx.fillStyle = '#fff'; ctx.font = '8px '+F;
     pxT(ctx, 'ПАЎТАРЫЦЬ', W / 2, 220, 8);
   }
+
+  // Donate CTA
+  ctx.fillStyle = '#999'; ctx.font = '8px '+F;
+  pxT(ctx, 'ХОЧАШ БОЛЬШ', W / 2, 252, 8);
+  pxT(ctx, 'ТАКІХ ГУЛЬНЯЎ?', W / 2, 264, 8);
+  ctx.fillStyle = '#44ddff';
+  pxT(ctx, 'ПАДТРЫМАЙ', W / 2, 282, 8);
+  pxT(ctx, 'ЗЕРКАЛА!', W / 2, 294, 8);
+  // Underline
+  const ulX = Math.round(W / 2 - 9 * 8 / 2);
+  ctx.fillRect(ulX, 284, 72, 1);
+  const ulX2 = Math.round(W / 2 - 8 * 8 / 2);
+  ctx.fillRect(ulX2, 296, 64, 1);
 }
 
 // ============================================================
