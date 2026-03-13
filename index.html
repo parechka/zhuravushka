@@ -773,7 +773,7 @@ function updateStream() {
 
   const pct = G.pressure / G.maxPressure;
   const turboMul = G.turboActive ? 2.0 : 1.0;
-  const range = 140 * (0.4 + 0.6 * pct) * turboMul;
+  const range = 140 * (0.55 + 0.45 * pct) * turboMul;
   const halfAng = (0.12 + 0.08 * pct) * (G.turboActive ? 2.5 : 1.0);
   const baseForce = 2.8 * turboMul;
 
@@ -1057,8 +1057,14 @@ function update() {
 
   G.spawnTimer--;
   if (G.spawnTimer <= 0) {
-    spawnTourist(pickType());
     const sec = G.time / 60;
+    spawnTourist(pickType());
+    // Group spawns: chance to spawn 2-3 at once, increasing over time
+    const groupChance = Math.min(0.6, sec * 0.008);
+    if (Math.random() < groupChance) {
+      spawnTourist(pickType());
+      if (sec > 30 && Math.random() < 0.4) spawnTourist(pickType());
+    }
     G.spawnInterval = Math.max(35, 90 - sec * 0.5);
     G.spawnTimer = G.spawnInterval;
   }
@@ -1645,7 +1651,7 @@ function renderLoading() {
       pxT(ctx, 'ДАКРАНІСЯ', W / 2, 220, 8);
     }
     ctx.fillStyle = '#555'; ctx.font = '8px '+F;
-    pxT(ctx, 'v0.03', W / 2, H - 12, 8);
+    pxT(ctx, 'v0.04', W / 2, H - 12, 8);
   } else {
     ctx.fillStyle = '#e94560'; ctx.font = '16px monospace';
     ctx.textAlign = 'center';
