@@ -968,7 +968,8 @@ function updateTourists() {
         b.x += nx * overlap * 0.5; b.y += ny * overlap * 0.5;
         const relV = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
         if (relV > 0) {
-          const impulse = relV * 0.7;
+          const slip = 1 - Math.max(a.muddy, b.muddy) * 0.85;
+          const impulse = relV * 0.7 * slip;
           a.vx -= impulse * nx * (b.mass / a.mass) * 0.5;
           a.vy -= impulse * ny * (b.mass / a.mass) * 0.5;
           b.vx += impulse * nx * (a.mass / b.mass) * 0.5;
@@ -1038,6 +1039,7 @@ function update() {
 
   // Shake decay
   G.shakeTrauma = Math.max(0, G.shakeTrauma - 0.02);
+  G.shakeTrauma = Math.min(G.shakeTrauma, 1.0);
   const shake = G.shakeTrauma * G.shakeTrauma;
   G.shakeX = (Math.random() - 0.5) * shake * 8;
   G.shakeY = (Math.random() - 0.5) * shake * 8;
