@@ -661,7 +661,7 @@ function onDown(p) {
     if (Date.now() - G.overTime < 1500) return;
     // Donate link area (y=270..300)
     if (p.y >= 270 && p.y <= 300) {
-      window.location.href = 'https://donorbox.org/donation_form';
+      window.location.href = 'https://donorbox.org/donation_form?zhuravushka';
       return;
     }
     audioGameover.pause();
@@ -1654,7 +1654,7 @@ function renderLoading() {
       pxT(ctx, 'ДАКРАНІСЯ', W / 2, 220, 8);
     }
     ctx.fillStyle = '#555'; ctx.font = '8px '+F;
-    pxT(ctx, 'v0.08', W / 2, H - 12, 8);
+    pxT(ctx, 'v0.09', W / 2, H - 12, 8);
   } else {
     ctx.fillStyle = '#e94560'; ctx.font = '16px monospace';
     ctx.textAlign = 'center';
