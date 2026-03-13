@@ -852,6 +852,7 @@ function updateTourists() {
         G.tourists.splice(i, 1);
         const door = G.doors[t.enterDoor];
         door.slamTimer = 12; door.open = false;
+        playSfx('enter');
         G.shakeTrauma += 0.25; G.hitstop = 3; G.flashAlpha = 0.3;
         G.healed++;
         for (let j = 0; j < 20; j++) {
@@ -922,7 +923,7 @@ function updateTourists() {
         const ddx = Math.abs(t.x - (DOOR_XS[d] + DOOR_W / 2));
         if (ddx < bestD) { bestD = ddx; best = d; }
       }
-      if (best >= 0) { t.state = 'enter'; t.enterDoor = best; G.doors[best].open = true; playSfx('enter'); continue; }
+      if (best >= 0) { t.state = 'enter'; t.enterDoor = best; G.doors[best].open = true; continue; }
     }
 
     if (t.y < GND_Y + 3 && t.vy < 0) t.vy = Math.abs(t.vy) * 0.3;
@@ -1651,7 +1652,7 @@ function renderLoading() {
       pxT(ctx, 'ДАКРАНІСЯ', W / 2, 220, 8);
     }
     ctx.fillStyle = '#555'; ctx.font = '8px '+F;
-    pxT(ctx, 'v0.04', W / 2, H - 12, 8);
+    pxT(ctx, 'v0.05', W / 2, H - 12, 8);
   } else {
     ctx.fillStyle = '#e94560'; ctx.font = '16px monospace';
     ctx.textAlign = 'center';
