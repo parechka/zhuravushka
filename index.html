@@ -1606,12 +1606,12 @@ function renderGameOver() {
   ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
   ctx.globalAlpha = pulse;
   pxT(ctx, 'ПАДТРЫМАЙ', W / 2, 280 + (bounce | 0), 8);
-  pxT(ctx, 'ЗЕРКАЛА!', W / 2, 292 + (bounce | 0), 8);
+  pxT(ctx, '"ЛЮСТЭРКА"!', W / 2, 292 + (bounce | 0), 8);
   // Underline
   const ulX = Math.round(W / 2 - 9 * 8 / 2);
   ctx.fillRect(ulX, 282 + (bounce | 0), 72, 1);
-  const ulX2 = Math.round(W / 2 - 8 * 8 / 2);
-  ctx.fillRect(ulX2, 294 + (bounce | 0), 64, 1);
+  const ulX2 = Math.round(W / 2 - 11 * 8 / 2);
+  ctx.fillRect(ulX2, 294 + (bounce | 0), 88, 1);
   ctx.globalAlpha = 1;
 }
 
