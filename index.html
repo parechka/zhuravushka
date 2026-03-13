@@ -719,7 +719,7 @@ function spawnTourist(type, doorIdx) {
   const door = G.doors[doorIdx];
   door.open = true; door.timer = 60;
   const tp = TYPES[type];
-  const speedUp = Math.min(1.35, 1.0 + G.bestCombo * 0.02 + G.time / 60 * 0.001);
+  const speedUp = Math.min(1.35, 1.0 + Math.min(G.bestCombo, 50) * 0.007);
   G.tourists.push({
     x: DOOR_XS[doorIdx] + DOOR_W / 2,
     y: BLD_BOT + 5,
@@ -1653,7 +1653,7 @@ function renderLoading() {
       pxT(ctx, 'ДАКРАНІСЯ', W / 2, 220, 8);
     }
     ctx.fillStyle = '#555'; ctx.font = '8px '+F;
-    pxT(ctx, 'v0.06', W / 2, H - 12, 8);
+    pxT(ctx, 'v0.07', W / 2, H - 12, 8);
   } else {
     ctx.fillStyle = '#e94560'; ctx.font = '16px monospace';
     ctx.textAlign = 'center';
