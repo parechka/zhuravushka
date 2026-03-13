@@ -942,6 +942,7 @@ function updateTourists() {
       }
       if (G.lives <= 0) {
         G.state = 'over'; G.overTime = Date.now();
+        sendStats();
         audioMusic.pause();
         stopVoice();
         stopAllSfx();
@@ -1653,7 +1654,7 @@ function renderLoading() {
       pxT(ctx, 'ДАКРАНІСЯ', W / 2, 220, 8);
     }
     ctx.fillStyle = '#555'; ctx.font = '8px '+F;
-    pxT(ctx, 'v0.07', W / 2, H - 12, 8);
+    pxT(ctx, 'v0.08', W / 2, H - 12, 8);
   } else {
     ctx.fillStyle = '#e94560'; ctx.font = '16px monospace';
     ctx.textAlign = 'center';
@@ -1698,6 +1699,22 @@ function loop(ts) {
   dCtx.drawImage(buf, 0, 0, display.width, display.height);
 
   requestAnimationFrame(loop);
+}
+
+// ============================================================
+// STATS
+// ============================================================
+async function sendStats() {
+  try {
+    const d = { healed: G.healed, score: G.score, bestCombo: G.bestCombo, timeSec: Math.round(G.time / 60) };
+    const raw = '' + d.healed + d.score + d.bestCombo + d.timeSec + 'zhuravushka2026';
+    const buf8 = new TextEncoder().encode(raw);
+    const hash = await crypto.subtle.digest('SHA-256', buf8);
+    d.sig = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    fetch('https://script.google.com/macros/s/AKfycbzwAglXh-GrQ-JqDUBy24tKYKTGvnMHvOBHd-_sSK0ZXhhBu9I24Bkbw-x3eb5Xi4g5sw/exec', {
+      method: 'POST', mode: 'no-cors', body: JSON.stringify(d)
+    }).catch(() => {});
+  } catch(e) {}
 }
 
 // Start loading all assets and run game loop
