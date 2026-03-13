@@ -32,8 +32,8 @@ const ctx = buf.getContext('2d');
 
 function resize() {
   const dpr = window.devicePixelRatio || 1;
-  // Bitmap: integer scale in physical pixels, capped at 4
-  const ps = Math.max(1, Math.min(4, Math.floor(Math.min(
+  // Bitmap: integer scale, capped at 3 (visually identical, saves GPU)
+  const ps = Math.max(1, Math.min(3, Math.floor(Math.min(
     window.innerWidth * dpr / W,
     window.innerHeight * dpr / H
   ))));
