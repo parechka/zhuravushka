@@ -756,7 +756,7 @@ function updateStream() {
     G.streamActive = false;
     stopFlow();
     if (!G.touching && G.pressure < G.maxPressure) {
-      G.pressure = Math.min(G.maxPressure, G.pressure + 20 / 60);
+      G.pressure = Math.min(G.maxPressure, G.pressure + 35 / 60);
       // Track thresholds recovering
       if (G.pressure >= G.maxPressure * 0.5) prevPressureAboveHalf = true;
       if (G.pressure > 0) prevPressureAboveZero = true;
@@ -773,11 +773,11 @@ function updateStream() {
 
   const pct = G.pressure / G.maxPressure;
   const turboMul = G.turboActive ? 2.0 : 1.0;
-  const range = 140 * pct * turboMul;
+  const range = 140 * (0.4 + 0.6 * pct) * turboMul;
   const halfAng = (0.12 + 0.08 * pct) * (G.turboActive ? 2.5 : 1.0);
   const baseForce = 2.8 * turboMul;
 
-  G.pressure = Math.max(0, G.pressure - (G.turboActive ? 20 : 12) / 60);
+  G.pressure = Math.max(0, G.pressure - (G.turboActive ? 16 : 8) / 60);
 
   // Warning SFX — once per crossing below 50%
   if (prevPressureAboveHalf && G.pressure < G.maxPressure * 0.5) {
@@ -806,7 +806,7 @@ function updateStream() {
     if (Math.abs(diff) > halfAng) continue;
 
     const distF = 1.0 - dist / range * 0.65;
-    const force = baseForce * (0.4 + 0.6 * pct) * distF * (1.0 - t.resist);
+    const force = baseForce * (0.5 + 0.5 * pct) * distF * (1.0 - t.resist);
     const pdx = Math.sin(G.aimAngle), pdy = -Math.cos(G.aimAngle);
     t.vx += (pdx + (Math.random() - 0.5) * 0.2) * force / t.mass;
     t.vy += (pdy + (Math.random() - 0.5) * 0.2) * force / t.mass;
@@ -1645,7 +1645,7 @@ function renderLoading() {
       pxT(ctx, 'ДАКРАНІСЯ', W / 2, 220, 8);
     }
     ctx.fillStyle = '#555'; ctx.font = '8px '+F;
-    pxT(ctx, 'v0.02', W / 2, H - 12, 8);
+    pxT(ctx, 'v0.03', W / 2, H - 12, 8);
   } else {
     ctx.fillStyle = '#e94560'; ctx.font = '16px monospace';
     ctx.textAlign = 'center';
