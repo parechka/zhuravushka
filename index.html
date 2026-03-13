@@ -806,7 +806,7 @@ function updateStream() {
     if (Math.abs(diff) > halfAng) continue;
 
     const distF = 1.0 - dist / range * 0.65;
-    const force = baseForce * pct * distF * (1.0 - t.resist);
+    const force = baseForce * (0.4 + 0.6 * pct) * distF * (1.0 - t.resist);
     const pdx = Math.sin(G.aimAngle), pdy = -Math.cos(G.aimAngle);
     t.vx += (pdx + (Math.random() - 0.5) * 0.2) * force / t.mass;
     t.vy += (pdy + (Math.random() - 0.5) * 0.2) * force / t.mass;
@@ -1644,6 +1644,8 @@ function renderLoading() {
       ctx.fillStyle = '#fff'; ctx.font = '8px '+F;
       pxT(ctx, 'ДАКРАНІСЯ', W / 2, 220, 8);
     }
+    ctx.fillStyle = '#555'; ctx.font = '8px '+F;
+    pxT(ctx, 'v0.02', W / 2, H - 12, 8);
   } else {
     ctx.fillStyle = '#e94560'; ctx.font = '16px monospace';
     ctx.textAlign = 'center';
